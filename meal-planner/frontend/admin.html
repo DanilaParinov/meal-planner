@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Planner — Админ-панель</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        @media (max-width: 700px) {
+            .admin-grid { grid-template-columns: 1fr; }
+        }
+        .admin-card {
+            background: var(--card-bg, #1e1e2e);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .admin-card h2 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: var(--accent, #a6e3a1);
+        }
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .field-group label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+        .result-box {
+            background: #11111b;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.8rem;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            min-height: 48px;
+            color: #cdd6f4;
+        }
+        .result-box.ok { border-left: 3px solid #a6e3a1; }
+        .result-box.err { border-left: 3px solid #f38ba8; }
+        .api-key-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .api-key-bar input { flex: 1; }
+        .hint { font-size: 0.78rem; opacity: 0.5; margin-top: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>Meal Planner — Админ</h1>
+        <p>Ручной ввод ресторанов и блюд из фото меню</p>
+    </header>
+
+    <div class="api-key-bar">
+        <input type="password" id="apiKey" class="input" placeholder="API ключ (test-user-abc123xyz)" />
+        <button class="btn btn-primary" onclick="saveKey()">Сохранить</button>
+        <a href="index.html" class="btn">← Приложение</a>
+    </div>
+
+    <div class="admin-grid">
+        <!-- Создать ресторан -->
+        <div class="admin-card">
+            <h2>1. Добавить ресторан</h2>
+            <div class="field-group">
+                <label>Название ресторана</label>
+                <input type="text" id="restName" class="input" placeholder="Например: Пицца Хаус" />
+            </div>
+            <button class="btn btn-primary" onclick="createRestaurant()">Создать ресторан</button>
+            <p class="hint">После создания скопируй ID ресторана — он нужен для добавления блюд</p>
+            <div id="restResult" class="result-box" style="margin-top:12px;display:none"></div>
+        </div>
+
+        <!-- Добавить блюдо -->
+        <div class="admin-card">
+            <h2>2. Добавить блюдо</h2>
+            <div class="field-group">
+                <label>ID ресторана</label>
+                <input type="text" id="mealRestId" class="input" placeholder="UUID ресторана" />
+            </div>
+            <div class="field-group">
+                <label>Название блюда</label>
+                <input type="text" id="mealName" class="input" placeholder="Например: Маргарита" />
+            </div>
+            <div class="field-group">
+                <label>Калории (ккал)</label>
+                <input type="number" id="mealCalories" class="input" placeholder="350" min="1" max="10000" />
+            </div>
+            <div class="field-group">
+                <label>Цена (руб.)</label>
+                <input type="number" id="mealPrice" class="input" placeholder="450" min="0" step="0.01" />
+            </div>
+            <div class="field-group">
+                <label>Описание (необязательно)</label>
+                <input type="text" id="mealDesc" class="input" placeholder="Томаты, моцарелла, базилик" />
+            </div>
+            <button class="btn btn-primary" onclick="createMeal()">Добавить блюдо</button>
+            <div id="mealResult" class="result-box" style="margin-top:12px;display:none"></div>
+        </div>
+    </div>
+
+    <!-- Список ресторанов для справки -->
+    <div class="admin-card" style="margin-top:24px">
+        <h2>Все рестораны в базе</h2>
+        <button class="btn" onclick="loadRestaurants()">Обновить список</button>
+        <div id="restList" style="margin-top:12px"></div>
+    </div>
+</div>
+
+<script>
+    const API = '';
+
+    function getKey() {
+        return document.getElementById('apiKey').value || localStorage.getItem('adminApiKey') || '';
+    }
+
+    function saveKey() {
+        const key = document.getElementById('apiKey').value.trim();
+        if (key) {
+            localStorage.setItem('adminApiKey', key);
+            alert('API ключ сохранён');
+        }
+    }
+
+    function headers() {
+        return { 'Content-Type': 'application/json', 'X-API-Key': getKey() };
+    }
+
+    function showResult(elId, data, isOk) {
+        const el = document.getElementById(elId);
+        el.style.display = 'block';
+        el.className = 'result-box ' + (isOk ? 'ok' : 'err');
+        el.textContent = JSON.stringify(data, null, 2);
+    }
+
+    async function createRestaurant() {
+        const name = document.getElementById('restName').value.trim();
+        if (!name) { alert('Введи название ресторана'); return; }
+
+        try {
+            const res = await fetch(`${API}/api/admin/restaurants`, {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify({ name })
+            });
+            const data = await res.json();
+            showResult('restResult', data, res.ok);
+
+            if (res.ok && data.data) {
+                document.getElementById('mealRestId').value = data.data.id;
+                document.getElementById('restName').value = '';
+                loadRestaurants();
+            }
+        } catch (e) {
+            showResult('restResult', { error: e.message }, false);
+        }
+    }
+
+    async function createMeal() {
+        const restaurant_id = document.getElementById('mealRestId').value.trim();
+        const name = document.getElementById('mealName').value.trim();
+        const calories = parseInt(document.getElementById('mealCalories').value);
+        const price = parseFloat(document.getElementById('mealPrice').value) || 0;
+        const description = document.getElementById('mealDesc').value.trim();
+
+        if (!restaurant_id) { alert('Введи ID ресторана'); return; }
+        if (!name) { alert('Введи название блюда'); return; }
+        if (!calories || calories < 1) { alert('Введи калорийность'); return; }
+
+        try {
+            const res = await fetch(`${API}/api/admin/meals`, {
+                method: 'POST',
+                headers: headers(),
+                body: JSON.stringify({ restaurant_id, name, calories, price, description })
+            });
+            const data = await res.json();
+            showResult('mealResult', data, res.ok);
+
+            if (res.ok) {
+                document.getElementById('mealName').value = '';
+                document.getElementById('mealCalories').value = '';
+                document.getElementById('mealPrice').value = '';
+                document.getElementById('mealDesc').value = '';
+            }
+        } catch (e) {
+            showResult('mealResult', { error: e.message }, false);
+        }
+    }
+
+    async function loadRestaurants() {
+        const el = document.getElementById('restList');
+        try {
+            const res = await fetch(`${API}/api/restaurants`, { headers: headers() });
+            const data = await res.json();
+            if (!res.ok || !data.data) {
+                el.textContent = 'Ошибка загрузки (проверь API ключ)';
+                return;
+            }
+            const restaurants = data.data;
+            if (!restaurants.length) { el.textContent = 'Рестораны не найдены'; return; }
+
+            el.innerHTML = restaurants.map(r =>
+                `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #313244">
+                    <span>${r.name}</span>
+                    <code style="font-size:0.75rem;opacity:0.6;cursor:pointer" onclick="document.getElementById('mealRestId').value='${r.id}';this.style.color='#a6e3a1'" title="Нажми, чтобы вставить в форму">${r.id}</code>
+                </div>`
+            ).join('');
+        } catch (e) {
+            el.textContent = 'Ошибка: ' + e.message;
+        }
+    }
+
+    // Восстановить сохранённый ключ
+    const saved = localStorage.getItem('adminApiKey');
+    if (saved) document.getElementById('apiKey').value = saved;
+
+    loadRestaurants();
+</script>
+</body>
+</html>

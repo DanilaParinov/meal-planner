@@ -1,0 +1,40 @@
+meal-planner/
+├── cmd/
+│   └── server/
+│       └── main.go              # Точка входа (инициализация, запуск сервера)
+│
+├── internal/
+│   ├── api/
+│   │   ├── handlers.go          # HTTP handlers (GET /meals, POST /collections, etc)
+│   │   ├── middleware.go        # Authentication middleware
+│   │   └── errors.go            # Error handling
+│   │
+│   ├── models/
+│   │   └── models.go            # Restaurant, Meal, User, MealCollection structs
+│   │
+│   ├── db/
+│   │   ├── db.go                # Database connection, initialization
+│   │   ├── queries.go           # Database queries (repositories pattern)
+│   │   └── migrations.go        # Schema migrations
+│   │
+│   ├── algorithm/
+│   │   └── knapsack.go          # Meal combination algorithm
+│   │
+│   └── config/
+│       └── config.go            # Configuration (env vars, constants)
+│
+├── migrations/
+│   ├── 001_create_tables.sql
+│   └── 002_seed_test_data.sql
+│
+├── frontend/
+│   ├── index.html               # Main UI
+│   ├── style.css
+│   └── app.js
+│
+├── go.mod                        # Module definition
+├── go.sum
+├── .env.example                  # Environment variables template
+├── docker-compose.yml            # PostgreSQL + PgAdmin (для локального тестирования)
+├── Dockerfile                    # For deployment later
+└── README.md

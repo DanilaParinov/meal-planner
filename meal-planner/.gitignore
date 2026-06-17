@@ -1,0 +1,16 @@
+# Фото меню (только для локального просмотра при ручном вводе)
+menu-photos/**/*.jpg
+menu-photos/**/*.jpeg
+menu-photos/**/*.png
+menu-photos/**/*.webp
+
+# Env файлы с секретами
+.env
+
+# Go build artifacts
+*.exe
+*.out
+
+# IDE
+.vscode/
+.idea/

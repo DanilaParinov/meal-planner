@@ -1,0 +1,69 @@
+# Игнорируем файлы и папки которые не нужны Claude Code
+# Это экономит контекст и улучшает безопасность
+
+# Dependencies
+node_modules/
+vendor/
+.mod/
+.sum/
+
+# Build artifacts
+dist/
+build/
+bin/
+*.o
+*.a
+*.so
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Yarn
+yarn.lock
+
+# Lock файлы (уменьшаем контекст)
+go.sum
+go.mod
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: meal_planner_db
+    environment:
+      POSTGRES_USER: changeme_user
+      POSTGRES_PASSWORD: changeme_password
+      POSTGRES_DB: meal_planner
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
