@@ -46,6 +46,9 @@ func main() {
 	// Служим статические файлы фронтенда
 	router.Static("/ui", "./frontend")
 	router.StaticFile("/", "./frontend/index.html")
+	router.StaticFile("/admin.html", "./frontend/admin.html")
+	router.StaticFile("/style.css", "./frontend/style.css")
+	router.StaticFile("/app.js", "./frontend/app.js")
 
 	// Запускаем сервер
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)

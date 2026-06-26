@@ -73,9 +73,9 @@ func (r *Repository) GetRestaurantByID(id string) (*models.Restaurant, error) {
 // GetMealsByRestaurant возвращает все блюда ресторана
 func (r *Repository) GetMealsByRestaurant(restaurantID string) ([]models.Meal, error) {
 	rows, err := r.db.Query(
-		`SELECT id, restaurant_id, name, calories, description, price, created_at 
-		 FROM meals 
-		 WHERE restaurant_id = $1 
+		`SELECT id, restaurant_id, name, calories, COALESCE(description, ''), COALESCE(price, 0), weight_g, is_drink, created_at
+		 FROM meals
+		 WHERE restaurant_id = $1
 		 ORDER BY name`,
 		restaurantID,
 	)
@@ -89,7 +89,7 @@ func (r *Repository) GetMealsByRestaurant(restaurantID string) ([]models.Meal, e
 		var meal models.Meal
 		if err := rows.Scan(
 			&meal.ID, &meal.RestaurantID, &meal.Name, &meal.Calories,
-			&meal.Description, &meal.Price, &meal.CreatedAt,
+			&meal.Description, &meal.Price, &meal.WeightG, &meal.IsDrink, &meal.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -103,12 +103,12 @@ func (r *Repository) GetMealsByRestaurant(restaurantID string) ([]models.Meal, e
 func (r *Repository) GetMealByID(id string) (*models.Meal, error) {
 	var meal models.Meal
 	err := r.db.QueryRow(
-		`SELECT id, restaurant_id, name, calories, description, price, created_at 
+		`SELECT id, restaurant_id, name, calories, COALESCE(description, ''), COALESCE(price, 0), weight_g, is_drink, created_at
 		 FROM meals WHERE id = $1`,
 		id,
 	).Scan(
 		&meal.ID, &meal.RestaurantID, &meal.Name, &meal.Calories,
-		&meal.Description, &meal.Price, &meal.CreatedAt,
+		&meal.Description, &meal.Price, &meal.WeightG, &meal.IsDrink, &meal.CreatedAt,
 	)
 
 	if err == sql.ErrNoRows {

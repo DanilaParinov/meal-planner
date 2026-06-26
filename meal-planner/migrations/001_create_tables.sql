@@ -15,12 +15,28 @@ CREATE TABLE IF NOT EXISTS meals (
     calories INT NOT NULL CHECK (calories > 0),
     description TEXT,
     price DECIMAL(10, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(restaurant_id, name)
 );
 
 -- Индексы для поиска
 CREATE INDEX IF NOT EXISTS idx_meals_restaurant_id ON meals(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_meals_calories ON meals(calories);
+
+-- Для существующих БД: удалить дубликаты и добавить уникальный constraint
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint WHERE conname = 'meals_restaurant_id_name_key'
+    ) THEN
+        DELETE FROM meals WHERE id NOT IN (
+            SELECT DISTINCT ON (restaurant_id, name) id
+            FROM meals
+            ORDER BY restaurant_id, name, created_at ASC
+        );
+        ALTER TABLE meals ADD CONSTRAINT meals_restaurant_id_name_key UNIQUE (restaurant_id, name);
+    END IF;
+END $$;
 
 -- Таблица пользователей (тестовые)
 CREATE TABLE IF NOT EXISTS users (

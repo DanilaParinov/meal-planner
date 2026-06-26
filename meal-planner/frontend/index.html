@@ -47,26 +47,58 @@
 
                     <div class="form-group">
                         <label for="calories">Максимум калорий:</label>
-                        <div class="calories-input">
-                            <input 
-                                type="range" 
-                                id="caloriesSlider" 
-                                min="100" 
-                                max="5000" 
-                                step="50" 
-                                value="1500"
+                        <div class="slider-row">
+                            <input
+                                type="range"
+                                id="caloriesSlider"
+                                min="100"
+                                max="5000"
+                                step="50"
+                                value="600"
                                 class="slider"
                             >
-                            <input 
-                                type="number" 
-                                id="calories" 
-                                min="100" 
-                                max="5000" 
-                                value="1500"
-                                class="input"
+                            <input
+                                type="number"
+                                id="calories"
+                                min="100"
+                                max="5000"
+                                value="600"
+                                class="input input-narrow"
                             >
                         </div>
-                        <p class="slider-label" id="caloriesLabel">1500 ккал</p>
+                        <p class="slider-label" id="caloriesLabel">600 ккал</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="weight">Максимум масса:</label>
+                        <div class="slider-row">
+                            <input
+                                type="range"
+                                id="weightSlider"
+                                min="100"
+                                max="2000"
+                                step="50"
+                                value="400"
+                                class="slider"
+                            >
+                            <input
+                                type="number"
+                                id="weight"
+                                min="100"
+                                max="2000"
+                                value="400"
+                                class="input input-narrow"
+                            >
+                        </div>
+                        <p class="slider-label" id="weightLabel">400 г</p>
+                    </div>
+
+                    <div class="form-group form-group-inline">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="includeDrinks" class="toggle-checkbox">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                            Включать напитки
+                        </label>
                     </div>
 
                     <button onclick="searchMeals()" class="btn btn-primary btn-block">

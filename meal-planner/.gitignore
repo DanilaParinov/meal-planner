@@ -4,9 +4,6 @@ menu-photos/**/*.jpeg
 menu-photos/**/*.png
 menu-photos/**/*.webp
 
-# Env файлы с секретами
-.env
-
 # Go build artifacts
 *.exe
 *.out

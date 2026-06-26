@@ -1,284 +1,117 @@
 # 🍽️ Meal Planner
 
-Сервис для подбора наборов блюд на основе калорийного лимита и доступных ресторанов.
+Сервис для подбора наборов блюд на основе калорийного лимита.
 
-## Стек технологий
+## Стек
 
 - **Backend**: Go + Gin
-- **Database**: PostgreSQL 15
+- **Database**: PostgreSQL 15 (Docker)
 - **Frontend**: HTML + CSS + Vanilla JS
-- **Deployment**: Yandex Cloud (позже)
 
-## Требования (для локальной разработки)
+---
 
-- Go 1.21+
-- Docker & Docker Compose
-- PostgreSQL 15 (или через Docker)
+## Первый запуск
 
-## Быстрый старт
+### Проверь зависимости
 
-### 1. Клонируй репозиторий и перейди в папку
-
-```bash
-cd meal-planner
+```powershell
+go version        # нужен Go 1.21+
+docker --version  # нужен Docker Desktop (запущенный)
 ```
 
-### 2. Подготовь переменные окружения
+### Собери бинарник
 
-```bash
-cp .env.example .env
+```powershell
+go build -o main.exe ./cmd/server/
 ```
 
-Если нужно изменить параметры, отредактируй `.env`.
+### Запусти
 
-### 3. Запусти PostgreSQL в Docker
-
-```bash
+```powershell
 docker-compose up -d
+.\main.exe
 ```
 
-Это запустит:
-- PostgreSQL на `localhost:5432`
-- pgAdmin на `http://localhost:5050` (опционально, для просмотра БД)
+---
 
-Убедись, что контейнер здоров:
-```bash
-docker-compose ps
+## Регулярный запуск
+
+```powershell
+# 1. Запустить БД (если не запущена)
+docker-compose up -d
+
+# 2. Запустить сервер
+.\main.exe
 ```
 
-### 4. Установи зависимости Go
+**Приложение:** `http://localhost:8080`  
+**Админ-панель:** `http://localhost:8080/admin.html`  
+**Тестовые API ключи:** `test-user-abc123xyz`, `test-user-def456uvw`
 
-```bash
-go mod download
-go mod tidy
+### Остановить
+
+```powershell
+# Сервер: Ctrl+C в терминале
+
+# БД
+docker-compose down
 ```
 
-### 5. Запусти сервер
+### Если порт 8080 уже занят
 
-```bash
-cd cmd/server
-go run main.go
+Это значит, что предыдущий сервер не был остановлен. Найди и убей процесс:
+
+```powershell
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue).OwningProcess | Stop-Process -Force
 ```
 
-Вывод должен быть похож на:
-```
-2024/01/15 10:30:45 ✓ Connected to database
-2024/01/15 10:30:45 ✓ Executed migration: 001_create_tables.sql
-2024/01/15 10:30:45 ✓ Executed migration: 002_seed_test_data.sql
-2024/01/15 10:30:45 🚀 Starting Meal Planner API (env: development, port: 8080)
-2024/01/15 10:30:45 ✓ Server listening on http://localhost:8080
-2024/01/15 10:30:45 ✓ UI available at http://localhost:8080/ui
-```
+---
 
-### 6. Открой приложение в браузере
+## Важно: локальный PostgreSQL
 
-```
-http://localhost:8080/ui
-```
+На машине установлен PostgreSQL, который занимает порт `5432`. Docker-контейнер поэтому использует порт `5433` — это уже прописано в `docker-compose.yml` и `.env`, ничего менять не нужно.
 
-или просто
-
-```
-http://localhost:8080
-```
-
-### 7. Залогинься тестовым ключом
-
-Доступные тестовые ключи (из `.env`):
-- `test-user-abc123xyz`
-- `test-user-def456uvw`
-- `test-user-ghi789rst`
+---
 
 ## Структура проекта
 
 ```
 meal-planner/
-├── cmd/server/          # Точка входа (main.go)
+├── cmd/server/main.go       # точка входа
 ├── internal/
-│   ├── api/            # HTTP handlers, middleware
-│   ├── db/             # Database layer
-│   ├── models/         # Struct definitions
-│   ├── algorithm/      # Knapsack algorithm
-│   └── config/         # Configuration
-├── migrations/         # SQL миграции
-├── frontend/           # HTML, CSS, JS
-├── docker-compose.yml  # PostgreSQL setup
-├── go.mod
-└── README.md
+│   ├── api/                 # HTTP handlers, middleware
+│   ├── db/                  # подключение и SQL запросы
+│   ├── models/              # structs
+│   ├── algorithm/           # алгоритм подбора блюд
+│   └── config/              # конфигурация
+├── migrations/              # SQL миграции (применяются автоматически)
+├── frontend/                # HTML, CSS, JS
+├── menu-photos/             # фото меню (не в git)
+├── docker-compose.yml
+└── .env
 ```
 
-## API Endpoints
+## Данные в БД
 
-### Публичные
+Рестораны и блюда загружаются автоматически при первом запуске из `migrations/003_import_restaurants.sql`:
 
-- `GET /health` — проверка статуса сервера
+| Ресторан | Блюд |
+|---|---|
+| Бостон | 58 |
+| Магнум | 64 |
+| Mozza | 78 |
+| Торро Гриль | 79 |
 
-### Защищенные (требуют `X-API-Key` header)
+## API
 
-#### Рестораны
-```
-GET /api/restaurants
-```
-Возвращает список всех доступных ресторанов.
+| Метод | Путь | Описание |
+|---|---|---|
+| GET | `/health` | статус сервера |
+| GET | `/api/restaurants` | список ресторанов |
+| POST | `/api/suggest` | подбор блюд по калориям |
+| GET | `/api/collections` | история пользователя |
+| POST | `/api/collections` | сохранить набор |
+| POST | `/api/admin/restaurants` | создать ресторан |
+| POST | `/api/admin/meals` | добавить блюдо |
 
-#### Подбор блюд
-```
-POST /api/suggest
-Content-Type: application/json
-X-API-Key: <your-api-key>
-
-{
-  "restaurant_id": "uuid",
-  "max_calories": 1500
-}
-```
-
-Возвращает массив комбинаций блюд, отсортированных по близости к максимуму калорий.
-
-#### История наборов
-```
-GET /api/collections
-X-API-Key: <your-api-key>
-```
-
-Возвращает все сохраненные пользователем наборы (последние 50).
-
-```
-POST /api/collections
-Content-Type: application/json
-X-API-Key: <your-api-key>
-
-{
-  "restaurant_id": "uuid",
-  "meal_ids": ["meal-id-1", "meal-id-2"],
-  "total_calories": 1250
-}
-```
-
-Сохраняет новый набор блюд.
-
-## Примеры использования
-
-### cURL
-
-```bash
-# Получить список ресторанов
-curl -H "X-API-Key: test-user-abc123xyz" \
-  http://localhost:8080/api/restaurants
-
-# Найти комбинации
-curl -X POST http://localhost:8080/api/suggest \
-  -H "X-API-Key: test-user-abc123xyz" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "restaurant_id": "restaurant-uuid",
-    "max_calories": 1500
-  }'
-
-# Сохранить набор
-curl -X POST http://localhost:8080/api/collections \
-  -H "X-API-Key: test-user-abc123xyz" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "restaurant_id": "restaurant-uuid",
-    "meal_ids": ["meal-1", "meal-2"],
-    "total_calories": 1250
-  }'
-```
-
-## Тестовые данные
-
-БД автоматически заполняется при первом запуске:
-
-**Рестораны (4):**
-- Пицца Хаус
-- Суши Мастер
-- Бургерная
-- Салат Бар
-
-**Блюда:** ~15-20 блюд на каждый ресторан
-
-**Пользователи (3):** с разными API ключами
-
-## Разработка
-
-### Структура кода
-
-- `internal/config/` — загрузка переменных окружения
-- `internal/db/` — подключение и запросы к БД
-- `internal/models/` — structs для JSON (request/response)
-- `internal/algorithm/` — алгоритм подбора блюд (knapsack)
-- `internal/api/` — HTTP обработчики и middleware
-
-### Добавление нового endpoint'а
-
-1. Добавь метод в `internal/api/handlers.go`
-2. Зарегистрируй маршрут в `RegisterRoutes()`
-3. Протестируй через cURL или UI
-
-### Добавление нового блюда в БД
-
-Создай SQL миграцию или используй прямой INSERT:
-
-```sql
-INSERT INTO meals (restaurant_id, name, calories, description, price)
-SELECT id, 'Новое блюдо', 300, 'Описание', 200.00
-FROM restaurants WHERE name = 'Пицца Хаус';
-```
-
-## Развертывание (Yandex Cloud)
-
-_В разработке — см. Phase 3 дорожной карты_
-
-## Проблемы и отладка
-
-### Не могу подключиться к БД
-
-Убедись, что контейнер работает:
-```bash
-docker-compose ps
-```
-
-Если не запущен:
-```bash
-docker-compose up -d
-```
-
-### Порт 5432 уже занят
-
-Измени порт в `docker-compose.yml`:
-```yaml
-ports:
-  - "5433:5432"  # Используем 5433 вместо 5432
-```
-
-И обнови `.env`:
-```
-DB_PORT=5433
-```
-
-### Миграции не выполняются
-
-Убедись, что папка `migrations/` находится в текущей директории при запуске:
-```bash
-pwd  # Должен быть в корне meal-planner/
-go run cmd/server/main.go
-```
-
-## Дорожная карта
-
-- [x] Phase 1: Основы (БД, API, тестовые данные)
-- [x] Phase 2: Алгоритм подбора
-- [x] Phase 3: Фронтенд (HTML/CSS/JS)
-- [ ] Phase 4: Пайплайн фото → БД
-- [ ] Deployment на Yandex Cloud
-- [ ] Добавление цены в подбор
-- [ ] Пользовательские предпочтения
-
-## Лицензия
-
-MIT
-
-## Вопросы?
-
-Смотри комментарии в коде или открой issue.
+Все `/api/*` эндпоинты (кроме `/health`) требуют заголовок `X-API-Key`.

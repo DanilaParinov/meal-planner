@@ -17,6 +17,8 @@ type Meal struct {
 	Calories     int       `json:"calories" db:"calories"`
 	Description  string    `json:"description,omitempty" db:"description"`
 	Price        float64   `json:"price,omitempty" db:"price"`
+	WeightG      *int      `json:"weight_g,omitempty" db:"weight_g"`
+	IsDrink      bool      `json:"is_drink" db:"is_drink"`
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
@@ -40,16 +42,20 @@ type MealSet struct {
 
 // MealCombination используется для внутренних расчетов
 type MealCombination struct {
-	Meals         []Meal
-	TotalCalories int
+	Meals         []Meal  `json:"meals"`
+	TotalCalories int     `json:"total_calories"`
+	TotalWeight   int     `json:"total_weight"`
+	Score         float64 `json:"score"`
 }
 
 // API Request/Response structs
 
 // FindMealsRequest параметры для поиска блюд
 type FindMealsRequest struct {
-	MaxCalories  int    `json:"max_calories" binding:"required,min=100,max=5000"`
-	RestaurantID string `json:"restaurant_id" binding:"required"`
+	MaxCalories   int    `json:"max_calories" binding:"required,min=100,max=5000"`
+	MaxWeight     int    `json:"max_weight"`
+	RestaurantID  string `json:"restaurant_id" binding:"required"`
+	IncludeDrinks bool   `json:"include_drinks"`
 }
 
 // SaveMealSetRequest сохранение подобранного набора

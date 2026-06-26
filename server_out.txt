@@ -1,0 +1,23 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health                   --> github.com/yourusername/meal-planner/internal/api.(*Handler).Health-fm (4 handlers)
+[GIN-debug] GET    /api/restaurants          --> github.com/yourusername/meal-planner/internal/api.(*Handler).GetRestaurants-fm (5 handlers)
+[GIN-debug] POST   /api/suggest              --> github.com/yourusername/meal-planner/internal/api.(*Handler).SuggestMeals-fm (5 handlers)
+[GIN-debug] GET    /api/collections          --> github.com/yourusername/meal-planner/internal/api.(*Handler).GetCollections-fm (5 handlers)
+[GIN-debug] POST   /api/collections          --> github.com/yourusername/meal-planner/internal/api.(*Handler).SaveCollection-fm (5 handlers)
+[GIN-debug] POST   /api/admin/restaurants    --> github.com/yourusername/meal-planner/internal/api.(*Handler).AdminCreateRestaurant-fm (5 handlers)
+[GIN-debug] POST   /api/admin/meals          --> github.com/yourusername/meal-planner/internal/api.(*Handler).AdminCreateMeal-fm (5 handlers)
+[GIN-debug] GET    /ui/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (4 handlers)
+[GIN-debug] HEAD   /ui/*filepath             --> github.com/gin-gonic/gin.(*RouterGroup).createStaticHandler.func1 (4 handlers)
+[GIN-debug] GET    /                         --> main.main.(*RouterGroup).StaticFile.func3 (4 handlers)
+[GIN-debug] HEAD   /                         --> main.main.(*RouterGroup).StaticFile.func3 (4 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN] 2026/06/19 - 22:18:12 | 200 |      3.0017ms |             ::1 | GET      "/api/restaurants"
+[GIN] 2026/06/19 - 22:18:12 | 200 |      4.2466ms |             ::1 | POST     "/api/suggest"
+[GIN] 2026/06/19 - 22:18:20 | 200 |            0s |             ::1 | GET      "/health"

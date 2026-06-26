@@ -101,15 +101,15 @@ func (h *Handler) SuggestMeals(c *gin.Context) {
 	}
 
 	// Решаем задачу подбора блюд
-	solver := algorithm.NewMealKnapsack(meals, req.MaxCalories)
-	solutions := solver.SolveOptimized(20) // Возвращаем топ 20 комбинаций
+	solutions := algorithm.FindBestCombinations(meals, req.MaxCalories, req.MaxWeight, req.IncludeDrinks, 20)
 
 	// Формируем ответ с информацией о ресторане
 	response := gin.H{
-		"restaurant": restaurant,
-		"max_calories": req.MaxCalories,
+		"restaurant":      restaurant,
+		"max_calories":    req.MaxCalories,
+		"max_weight":      req.MaxWeight,
 		"solutions_count": len(solutions),
-		"solutions": solutions,
+		"solutions":       solutions,
 	}
 
 	SuccessResponse(c, http.StatusOK, response, "Meal combinations found")
