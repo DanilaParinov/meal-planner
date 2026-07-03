@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	// Загружаем конфигурацию
+	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
@@ -19,38 +19,38 @@ func main() {
 
 	log.Printf("🚀 Starting Meal Planner API (env: %s, port: %s)", cfg.ServerEnv, cfg.ServerPort)
 
-	// Подключаемся к БД
+	// Connect to the database
 	database, err := db.New(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer database.Close()
 
-	// Создаем репозиторий
+	// Create the repository
 	repo := db.NewRepository(database)
 
-	// Настраиваем Gin
+	// Configure Gin
 	if !cfg.IsDevelopment() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
 	router := gin.Default()
 
-	// CORS для фронтенда
+	// CORS for the frontend
 	router.Use(corsMiddleware())
 
-	// Регистрируем маршруты
+	// Register routes
 	handler := api.NewHandler(repo)
 	handler.RegisterRoutes(router)
 
-	// Служим статические файлы фронтенда
+	// Serve static frontend files
 	router.Static("/ui", "./frontend")
 	router.StaticFile("/", "./frontend/index.html")
 	router.StaticFile("/admin.html", "./frontend/admin.html")
 	router.StaticFile("/style.css", "./frontend/style.css")
 	router.StaticFile("/app.js", "./frontend/app.js")
 
-	// Запускаем сервер
+	// Start the server
 	addr := fmt.Sprintf(":%s", cfg.ServerPort)
 	log.Printf("✓ Server listening on http://localhost%s", addr)
 	log.Printf("✓ UI available at http://localhost%s/ui", addr)
@@ -60,7 +60,7 @@ func main() {
 	}
 }
 
-// corsMiddleware добавляет CORS headers
+// corsMiddleware adds CORS headers
 func corsMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")

@@ -13,6 +13,7 @@ menu-photos/**/*.webp
 
 # Local Claude Code notes (solo project, not needed in public repo)
 CLAUDE.md
+.claudeignore
 
 # IDE
 .vscode/

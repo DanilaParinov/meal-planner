@@ -72,7 +72,7 @@
     </div>
 
     <div class="admin-grid">
-        <!-- Создать ресторан -->
+        <!-- Create restaurant -->
         <div class="admin-card">
             <h2>1. Добавить ресторан</h2>
             <div class="field-group">
@@ -84,7 +84,7 @@
             <div id="restResult" class="result-box" style="margin-top:12px;display:none"></div>
         </div>
 
-        <!-- Добавить блюдо -->
+        <!-- Add meal -->
         <div class="admin-card">
             <h2>2. Добавить блюдо</h2>
             <div class="field-group">
@@ -112,7 +112,7 @@
         </div>
     </div>
 
-    <!-- Список ресторанов для справки -->
+    <!-- List of restaurants for reference -->
     <div class="admin-card" style="margin-top:24px">
         <h2>Все рестораны в базе</h2>
         <button class="btn" onclick="loadRestaurants()">Обновить список</button>
@@ -223,7 +223,7 @@
         }
     }
 
-    // Восстановить сохранённый ключ
+    // Restore the saved key
     const saved = localStorage.getItem('adminApiKey');
     if (saved) document.getElementById('apiKey').value = saved;
 

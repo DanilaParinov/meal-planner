@@ -2,14 +2,14 @@ package models
 
 import "time"
 
-// Restaurant представляет ресторан
+// Restaurant represents a restaurant
 type Restaurant struct {
 	ID        string    `json:"id" db:"id"`
 	Name      string    `json:"name" db:"name"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
-// Meal представляет блюдо в меню ресторана
+// Meal represents a dish on a restaurant's menu
 type Meal struct {
 	ID           string    `json:"id" db:"id"`
 	RestaurantID string    `json:"restaurant_id" db:"restaurant_id"`
@@ -22,7 +22,7 @@ type Meal struct {
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
-// User представляет тестового пользователя
+// User represents a test user
 type User struct {
 	ID        string    `json:"id" db:"id"`
 	DeviceID  string    `json:"device_id" db:"device_id"`
@@ -30,7 +30,7 @@ type User struct {
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
-// MealSet представляет набор блюд (результат подбора)
+// MealSet represents a set of meals (a suggestion result)
 type MealSet struct {
 	ID            string    `json:"id" db:"id"`
 	UserID        string    `json:"user_id" db:"user_id"`
@@ -40,7 +40,7 @@ type MealSet struct {
 	CreatedAt     time.Time `json:"created_at" db:"created_at"`
 }
 
-// MealCombination используется для внутренних расчетов
+// MealCombination is used for internal calculations
 type MealCombination struct {
 	Meals         []Meal  `json:"meals"`
 	TotalCalories int     `json:"total_calories"`
@@ -50,7 +50,7 @@ type MealCombination struct {
 
 // API Request/Response structs
 
-// FindMealsRequest параметры для поиска блюд
+// FindMealsRequest holds the parameters for finding meals
 type FindMealsRequest struct {
 	MaxCalories   int    `json:"max_calories" binding:"required,min=100,max=5000"`
 	MaxWeight     int    `json:"max_weight"`
@@ -58,19 +58,19 @@ type FindMealsRequest struct {
 	IncludeDrinks bool   `json:"include_drinks"`
 }
 
-// SaveMealSetRequest сохранение подобранного набора
+// SaveMealSetRequest saves a suggested meal set
 type SaveMealSetRequest struct {
 	RestaurantID  string   `json:"restaurant_id" binding:"required"`
 	MealIDs       []string `json:"meal_ids" binding:"required"`
 	TotalCalories int      `json:"total_calories" binding:"required"`
 }
 
-// CreateRestaurantRequest создание ресторана
+// CreateRestaurantRequest creates a restaurant
 type CreateRestaurantRequest struct {
 	Name string `json:"name" binding:"required,min=1,max=255"`
 }
 
-// CreateMealRequest добавление блюда
+// CreateMealRequest adds a meal
 type CreateMealRequest struct {
 	RestaurantID string  `json:"restaurant_id" binding:"required"`
 	Name         string  `json:"name" binding:"required,min=1,max=255"`
@@ -79,14 +79,14 @@ type CreateMealRequest struct {
 	Description  string  `json:"description"`
 }
 
-// ErrorResponse общее сообщение об ошибке
+// ErrorResponse is a generic error message
 type ErrorResponse struct {
 	Error   string `json:"error"`
 	Message string `json:"message,omitempty"`
 	Code    string `json:"code,omitempty"`
 }
 
-// SuccessResponse общее сообщение успеха
+// SuccessResponse is a generic success message
 type SuccessResponse struct {
 	Success bool        `json:"success"`
 	Data    interface{} `json:"data,omitempty"`

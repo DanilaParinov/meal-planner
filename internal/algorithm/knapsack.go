@@ -15,9 +15,9 @@ func mealWeight(m models.Meal) int {
 	return *m.WeightG
 }
 
-// FindBestCombinations возвращает top N комбинаций, отсортированных по сумме процентов
-// использования лимитов: (totalCals/maxCals + totalWeight/maxWeight) * 100.
-// Если maxWeight == 0 — весовой лимит не применяется.
+// FindBestCombinations returns the top N combinations, sorted by the sum of
+// limit-usage percentages: (totalCals/maxCals + totalWeight/maxWeight) * 100.
+// If maxWeight == 0, the weight limit is not applied.
 func FindBestCombinations(meals []models.Meal, maxCals, maxWeight int, includeDrinks bool, topN int) []models.MealCombination {
 	valid := make([]models.Meal, 0, len(meals))
 	for _, m := range meals {

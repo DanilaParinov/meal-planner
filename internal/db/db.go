@@ -12,12 +12,12 @@ import (
 	"meal-planner/internal/config"
 )
 
-// Database инкапсулирует подключение к БД
+// Database encapsulates the database connection
 type Database struct {
 	db *sql.DB
 }
 
-// New создает новое подключение к БД
+// New creates a new database connection
 func New(cfg *config.Config) (*Database, error) {
 	dbURL := cfg.GetDatabaseURL()
 
@@ -26,7 +26,7 @@ func New(cfg *config.Config) (*Database, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// Проверяем подключение
+	// Verify the connection
 	if err := conn.Ping(); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
@@ -35,7 +35,7 @@ func New(cfg *config.Config) (*Database, error) {
 
 	d := &Database{db: conn}
 
-	// Выполняем миграции
+	// Run migrations
 	if err := d.runMigrations(); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
@@ -43,9 +43,9 @@ func New(cfg *config.Config) (*Database, error) {
 	return d, nil
 }
 
-// runMigrations выполняет все SQL миграции из папки migrations/
+// runMigrations executes all SQL migrations from the migrations/ folder
 func (d *Database) runMigrations() error {
-	// Читаем миграции из папки
+	// Read migrations from the folder
 	files, err := ioutil.ReadDir("migrations")
 	if err != nil {
 		return fmt.Errorf("failed to read migrations directory: %w", err)
@@ -59,7 +59,7 @@ func (d *Database) runMigrations() error {
 				return fmt.Errorf("failed to read migration file %s: %w", filePath, err)
 			}
 
-			// Выполняем SQL
+			// Execute SQL
 			if _, err := d.db.Exec(string(content)); err != nil {
 				return fmt.Errorf("failed to execute migration %s: %w", filePath, err)
 			}
@@ -71,12 +71,12 @@ func (d *Database) runMigrations() error {
 	return nil
 }
 
-// Close закрывает подключение к БД
+// Close closes the database connection
 func (d *Database) Close() error {
 	return d.db.Close()
 }
 
-// GetDB возвращает само подключение (для запросов)
+// GetDB returns the underlying connection (for queries)
 func (d *Database) GetDB() *sql.DB {
 	return d.db
 }

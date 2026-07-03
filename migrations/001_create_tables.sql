@@ -1,13 +1,13 @@
 -- migrations/001_create_tables.sql
 
--- Таблица ресторанов
+-- Restaurants table
 CREATE TABLE IF NOT EXISTS restaurants (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Таблица блюд
+-- Meals table
 CREATE TABLE IF NOT EXISTS meals (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
@@ -19,11 +19,11 @@ CREATE TABLE IF NOT EXISTS meals (
     UNIQUE(restaurant_id, name)
 );
 
--- Индексы для поиска
+-- Search indexes
 CREATE INDEX IF NOT EXISTS idx_meals_restaurant_id ON meals(restaurant_id);
 CREATE INDEX IF NOT EXISTS idx_meals_calories ON meals(calories);
 
--- Для существующих БД: удалить дубликаты и добавить уникальный constraint
+-- For existing databases: remove duplicates and add a unique constraint
 DO $$
 BEGIN
     IF NOT EXISTS (
@@ -38,7 +38,7 @@ BEGIN
     END IF;
 END $$;
 
--- Таблица пользователей (тестовые)
+-- Users table (test users)
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     device_id VARCHAR(255) NOT NULL UNIQUE,
@@ -49,13 +49,13 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE INDEX IF NOT EXISTS idx_users_api_key ON users(api_key);
 CREATE INDEX IF NOT EXISTS idx_users_device_id ON users(device_id);
 
--- Таблица сохраненных наборов блюд
+-- Saved meal collections table
 CREATE TABLE IF NOT EXISTS meal_collections (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
     total_calories INT NOT NULL CHECK (total_calories > 0),
-    meal_ids UUID[] NOT NULL, -- массив ID блюд
+    meal_ids UUID[] NOT NULL, -- array of meal IDs
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

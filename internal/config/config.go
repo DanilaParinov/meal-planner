@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// Config содержит все конфигурационные параметры приложения
+// Config holds all application configuration parameters
 type Config struct {
 	// Database
 	DBHost     string
@@ -26,9 +26,9 @@ type Config struct {
 	TestUsers map[string]string // api_key -> device_id
 }
 
-// Load загружает конфигурацию из .env файла и переменных окружения
+// Load loads configuration from the .env file and environment variables
 func Load() (*Config, error) {
-	// Загружаем .env файл (не критично если не существует)
+	// Load .env file (not critical if it doesn't exist)
 	_ = godotenv.Load()
 
 	cfg := &Config{
@@ -45,8 +45,8 @@ func Load() (*Config, error) {
 		TestUsers: make(map[string]string),
 	}
 
-	// Загружаем тестовых пользователей
-	// Пример: TEST_USER_1_API_KEY=abc123, TEST_USER_1_DEVICE_ID=device-1
+	// Load test users
+	// Example: TEST_USER_1_API_KEY=abc123, TEST_USER_1_DEVICE_ID=device-1
 	for i := 1; i <= 10; i++ {
 		apiKeyEnv := fmt.Sprintf("TEST_USER_%d_API_KEY", i)
 		deviceIDEnv := fmt.Sprintf("TEST_USER_%d_DEVICE_ID", i)
@@ -62,7 +62,7 @@ func Load() (*Config, error) {
 	return cfg, nil
 }
 
-// GetDatabaseURL формирует строку подключения к БД
+// GetDatabaseURL builds the database connection string
 func (c *Config) GetDatabaseURL() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
@@ -75,12 +75,12 @@ func (c *Config) GetDatabaseURL() string {
 	)
 }
 
-// IsDevelopment проверяет, находимся ли мы в режиме разработки
+// IsDevelopment checks whether we're running in development mode
 func (c *Config) IsDevelopment() bool {
 	return c.ServerEnv == "development" || c.ServerEnv == "dev"
 }
 
-// getEnv получает переменную окружения с fallback значением
+// getEnv retrieves an environment variable with a fallback default value
 func getEnv(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
@@ -88,7 +88,7 @@ func getEnv(key, defaultValue string) string {
 	return defaultValue
 }
 
-// getEnvAsInt получает целое число из переменной окружения
+// getEnvAsInt retrieves an integer value from an environment variable
 func getEnvAsInt(key string, defaultValue int) int {
 	value := os.Getenv(key)
 	if intVal, err := strconv.Atoi(value); err == nil {

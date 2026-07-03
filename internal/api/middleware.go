@@ -8,7 +8,7 @@ import (
 	"meal-planner/internal/models"
 )
 
-// AuthMiddleware проверяет API ключ в заголовке
+// AuthMiddleware validates the API key in the request header
 func AuthMiddleware(repo *db.Repository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		apiKey := c.GetHeader("X-API-Key")
@@ -22,7 +22,7 @@ func AuthMiddleware(repo *db.Repository) gin.HandlerFunc {
 			return
 		}
 
-		// Проверяем ключ в БД
+		// Look up the key in the database
 		user, err := repo.GetUserByAPIKey(apiKey)
 		if err != nil {
 			c.JSON(401, models.ErrorResponse{
@@ -34,7 +34,7 @@ func AuthMiddleware(repo *db.Repository) gin.HandlerFunc {
 			return
 		}
 
-		// Сохраняем пользователя в контексте для использования в handlers'ах
+		// Store the user in the context for use in handlers
 		c.Set("user", user)
 		c.Set("user_id", user.ID)
 		c.Set("device_id", user.DeviceID)
@@ -43,7 +43,7 @@ func AuthMiddleware(repo *db.Repository) gin.HandlerFunc {
 	}
 }
 
-// ErrorHandler обрабатывает ошибки валидации
+// ErrorHandler handles validation errors
 func ErrorHandler(c *gin.Context, err error) {
 	c.JSON(400, models.ErrorResponse{
 		Error:   "invalid_request",
@@ -52,7 +52,7 @@ func ErrorHandler(c *gin.Context, err error) {
 	})
 }
 
-// SuccessResponse отправляет успешный ответ
+// SuccessResponse sends a successful response
 func SuccessResponse(c *gin.Context, statusCode int, data interface{}, message string) {
 	c.JSON(statusCode, models.SuccessResponse{
 		Success: true,
@@ -61,7 +61,7 @@ func SuccessResponse(c *gin.Context, statusCode int, data interface{}, message s
 	})
 }
 
-// ErrorResponse отправляет ошибку
+// ErrorResponse sends an error response
 func ErrorResponseJSON(c *gin.Context, statusCode int, errCode, errMsg string) {
 	c.JSON(statusCode, models.ErrorResponse{
 		Error:   errCode,
@@ -70,7 +70,7 @@ func ErrorResponseJSON(c *gin.Context, statusCode int, errCode, errMsg string) {
 	})
 }
 
-// GetUserFromContext извлекает пользователя из контекста
+// GetUserFromContext extracts the user from the context
 func GetUserFromContext(c *gin.Context) *models.User {
 	user, exists := c.Get("user")
 	if !exists {

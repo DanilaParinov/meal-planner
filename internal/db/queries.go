@@ -8,19 +8,19 @@ import (
 	"meal-planner/internal/models"
 )
 
-// Repository инкапсулирует все операции с БД
+// Repository encapsulates all database operations
 type Repository struct {
 	db *sql.DB
 }
 
-// NewRepository создает новый репозиторий
+// NewRepository creates a new repository
 func NewRepository(database *Database) *Repository {
 	return &Repository{db: database.GetDB()}
 }
 
 // ===== Restaurants =====
 
-// GetAllRestaurants возвращает все рестораны
+// GetAllRestaurants returns all restaurants
 func (r *Repository) GetAllRestaurants() ([]models.Restaurant, error) {
 	rows, err := r.db.Query("SELECT id, name, created_at FROM restaurants ORDER BY name")
 	if err != nil {
@@ -40,7 +40,7 @@ func (r *Repository) GetAllRestaurants() ([]models.Restaurant, error) {
 	return restaurants, rows.Err()
 }
 
-// CreateRestaurant добавляет новый ресторан
+// CreateRestaurant adds a new restaurant
 func (r *Repository) CreateRestaurant(name string) (*models.Restaurant, error) {
 	var rest models.Restaurant
 	err := r.db.QueryRow(
@@ -50,7 +50,7 @@ func (r *Repository) CreateRestaurant(name string) (*models.Restaurant, error) {
 	return &rest, err
 }
 
-// GetRestaurantByID возвращает ресторан по ID
+// GetRestaurantByID returns a restaurant by ID
 func (r *Repository) GetRestaurantByID(id string) (*models.Restaurant, error) {
 	var rest models.Restaurant
 	err := r.db.QueryRow(
@@ -70,7 +70,7 @@ func (r *Repository) GetRestaurantByID(id string) (*models.Restaurant, error) {
 
 // ===== Meals =====
 
-// GetMealsByRestaurant возвращает все блюда ресторана
+// GetMealsByRestaurant returns all meals for a restaurant
 func (r *Repository) GetMealsByRestaurant(restaurantID string) ([]models.Meal, error) {
 	rows, err := r.db.Query(
 		`SELECT id, restaurant_id, name, calories, COALESCE(description, ''), COALESCE(price, 0), weight_g, is_drink, created_at
@@ -99,7 +99,7 @@ func (r *Repository) GetMealsByRestaurant(restaurantID string) ([]models.Meal, e
 	return meals, rows.Err()
 }
 
-// GetMealByID возвращает одно блюдо по ID
+// GetMealByID returns a single meal by ID
 func (r *Repository) GetMealByID(id string) (*models.Meal, error) {
 	var meal models.Meal
 	err := r.db.QueryRow(
@@ -121,7 +121,7 @@ func (r *Repository) GetMealByID(id string) (*models.Meal, error) {
 	return &meal, nil
 }
 
-// CreateMeal добавляет новое блюдо
+// CreateMeal adds a new meal
 func (r *Repository) CreateMeal(meal *models.Meal) (string, error) {
 	var id string
 	err := r.db.QueryRow(
@@ -136,7 +136,7 @@ func (r *Repository) CreateMeal(meal *models.Meal) (string, error) {
 
 // ===== Users =====
 
-// GetUserByAPIKey возвращает пользователя по API ключу
+// GetUserByAPIKey returns a user by API key
 func (r *Repository) GetUserByAPIKey(apiKey string) (*models.User, error) {
 	var user models.User
 	err := r.db.QueryRow(
@@ -154,7 +154,7 @@ func (r *Repository) GetUserByAPIKey(apiKey string) (*models.User, error) {
 	return &user, nil
 }
 
-// CreateUser добавляет нового пользователя
+// CreateUser adds a new user
 func (r *Repository) CreateUser(user *models.User) (string, error) {
 	var id string
 	err := r.db.QueryRow(
@@ -169,9 +169,9 @@ func (r *Repository) CreateUser(user *models.User) (string, error) {
 
 // ===== Meal Collections =====
 
-// SaveMealCollection сохраняет набор блюд
+// SaveMealCollection saves a meal collection
 func (r *Repository) SaveMealCollection(collection *models.MealSet) (string, error) {
-	// Преобразуем []Meal в []string (ID'ы)
+	// Convert []Meal to []string (IDs)
 	mealIDs := make([]string, len(collection.Meals))
 	for i, m := range collection.Meals {
 		mealIDs[i] = m.ID
@@ -188,7 +188,7 @@ func (r *Repository) SaveMealCollection(collection *models.MealSet) (string, err
 	return id, err
 }
 
-// GetUserCollections возвращает все наборы пользователя
+// GetUserCollections returns all collections for a user
 func (r *Repository) GetUserCollections(userID string) ([]models.MealSet, error) {
 	rows, err := r.db.Query(
 		`SELECT id, user_id, restaurant_id, total_calories, meal_ids, created_at 
@@ -215,7 +215,7 @@ func (r *Repository) GetUserCollections(userID string) ([]models.MealSet, error)
 			return nil, err
 		}
 
-		// Загружаем полные данные о блюдах
+		// Load full meal data
 		meals := make([]models.Meal, len(mealIDs))
 		for i, mealID := range mealIDs {
 			meal, err := r.GetMealByID(mealID)

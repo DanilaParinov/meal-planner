@@ -2,7 +2,7 @@ const API_BASE = 'http://localhost:8080/api';
 let currentApiKey = null;
 let lastSolutions = null;
 
-// ===== Инициализация =====
+// ===== Initialization =====
 
 document.addEventListener('DOMContentLoaded', () => {
     const savedApiKey = localStorage.getItem('apiKey');
@@ -24,7 +24,7 @@ function linkSlider(sliderId, inputId, labelId, format) {
     input.addEventListener('input',  e => { slider.value = e.target.value; update(e.target.value); });
 }
 
-// ===== Аутентификация =====
+// ===== Authentication =====
 
 async function login() {
     const apiKey = document.getElementById('apiKey').value.trim();
@@ -61,7 +61,7 @@ async function showApp(apiKey) {
     await loadHistory(apiKey);
 }
 
-// ===== Рестораны =====
+// ===== Restaurants =====
 
 async function loadRestaurants(apiKey) {
     try {
@@ -80,7 +80,7 @@ async function loadRestaurants(apiKey) {
     }
 }
 
-// ===== Поиск блюд =====
+// ===== Meal Search =====
 
 async function searchMeals() {
     const restaurantID    = document.getElementById('restaurant').value;
@@ -171,7 +171,7 @@ function displayResults(data, restaurantID) {
     });
 }
 
-// ===== Сохранение наборов =====
+// ===== Saving Collections =====
 
 async function saveCollection(restaurantID, solutionIndex) {
     if (!lastSolutions || !lastSolutions[solutionIndex]) {
@@ -195,7 +195,7 @@ async function saveCollection(restaurantID, solutionIndex) {
     }
 }
 
-// ===== История =====
+// ===== History =====
 
 async function loadHistory(apiKey) {
     try {
@@ -219,11 +219,11 @@ async function loadHistory(apiKey) {
             historyDiv.appendChild(item);
         });
     } catch {
-        // тихо падаем
+        // fail silently
     }
 }
 
-// ===== Утилиты =====
+// ===== Utilities =====
 
 function showNotification(message, type = 'info') {
     const n = document.createElement('div');

@@ -9,36 +9,36 @@ import (
 	"meal-planner/internal/models"
 )
 
-// Handler инкапсулирует все обработчики HTTP запросов
+// Handler encapsulates all HTTP request handlers
 type Handler struct {
 	repo *db.Repository
 }
 
-// NewHandler создает новый обработчик
+// NewHandler creates a new handler
 func NewHandler(repo *db.Repository) *Handler {
 	return &Handler{repo: repo}
 }
 
-// RegisterRoutes регистрирует все маршруты API
+// RegisterRoutes registers all API routes
 func (h *Handler) RegisterRoutes(router *gin.Engine) {
-	// Публичные endpoints
+	// Public endpoints
 	router.GET("/health", h.Health)
 
-	// Защищенные endpoints (требуют аутентификации)
+	// Protected endpoints (require authentication)
 	authorized := router.Group("")
 	authorized.Use(AuthMiddleware(h.repo))
 	{
-		// Рестораны
+		// Restaurants
 		authorized.GET("/api/restaurants", h.GetRestaurants)
 
-		// Подбор блюд
+		// Meal suggestion
 		authorized.POST("/api/suggest", h.SuggestMeals)
 
-		// История
+		// History
 		authorized.GET("/api/collections", h.GetCollections)
 		authorized.POST("/api/collections", h.SaveCollection)
 
-		// Админ: ручной ввод ресторанов и блюд
+		// Admin: manual entry of restaurants and meals
 		authorized.POST("/api/admin/restaurants", h.AdminCreateRestaurant)
 		authorized.POST("/api/admin/meals", h.AdminCreateMeal)
 	}
@@ -46,7 +46,7 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 
 // ===== Public Endpoints =====
 
-// Health проверяет, работает ли сервер
+// Health checks whether the server is running
 func (h *Handler) Health(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status": "ok",
@@ -56,7 +56,7 @@ func (h *Handler) Health(c *gin.Context) {
 
 // ===== Restaurants =====
 
-// GetRestaurants возвращает список всех ресторанов
+// GetRestaurants returns a list of all restaurants
 // GET /api/restaurants
 func (h *Handler) GetRestaurants(c *gin.Context) {
 	restaurants, err := h.repo.GetAllRestaurants()
@@ -70,7 +70,7 @@ func (h *Handler) GetRestaurants(c *gin.Context) {
 
 // ===== Meal Suggestion =====
 
-// SuggestMeals подбирает набор блюд по калорийному лимиту
+// SuggestMeals finds a set of meals matching the calorie limit
 // POST /api/suggest
 // Body: {"restaurant_id": "...", "max_calories": 1500}
 func (h *Handler) SuggestMeals(c *gin.Context) {
@@ -81,14 +81,14 @@ func (h *Handler) SuggestMeals(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, существует ли ресторан
+	// Check whether the restaurant exists
 	restaurant, err := h.repo.GetRestaurantByID(req.RestaurantID)
 	if err != nil {
 		ErrorResponseJSON(c, http.StatusNotFound, "restaurant_not_found", "Restaurant does not exist")
 		return
 	}
 
-	// Получаем блюда ресторана
+	// Fetch the restaurant's meals
 	meals, err := h.repo.GetMealsByRestaurant(req.RestaurantID)
 	if err != nil {
 		ErrorResponseJSON(c, http.StatusInternalServerError, "database_error", "Failed to fetch meals")
@@ -100,10 +100,10 @@ func (h *Handler) SuggestMeals(c *gin.Context) {
 		return
 	}
 
-	// Решаем задачу подбора блюд
+	// Solve the meal selection problem
 	solutions := algorithm.FindBestCombinations(meals, req.MaxCalories, req.MaxWeight, req.IncludeDrinks, 20)
 
-	// Формируем ответ с информацией о ресторане
+	// Build the response with restaurant info
 	response := gin.H{
 		"restaurant":      restaurant,
 		"max_calories":    req.MaxCalories,
@@ -117,7 +117,7 @@ func (h *Handler) SuggestMeals(c *gin.Context) {
 
 // ===== Collections =====
 
-// GetCollections возвращает историю сохраненных наборов пользователя
+// GetCollections returns the user's saved collection history
 // GET /api/collections
 func (h *Handler) GetCollections(c *gin.Context) {
 	user := GetUserFromContext(c)
@@ -135,7 +135,7 @@ func (h *Handler) GetCollections(c *gin.Context) {
 	SuccessResponse(c, http.StatusOK, collections, "Collections fetched successfully")
 }
 
-// SaveCollection сохраняет выбранный набор блюд
+// SaveCollection saves the selected set of meals
 // POST /api/collections
 // Body: {"restaurant_id": "...", "meal_ids": ["...", "..."], "total_calories": 1250}
 func (h *Handler) SaveCollection(c *gin.Context) {
@@ -152,14 +152,14 @@ func (h *Handler) SaveCollection(c *gin.Context) {
 		return
 	}
 
-	// Проверяем, существует ли ресторан
+	// Check whether the restaurant exists
 	_, err := h.repo.GetRestaurantByID(req.RestaurantID)
 	if err != nil {
 		ErrorResponseJSON(c, http.StatusNotFound, "restaurant_not_found", "Restaurant does not exist")
 		return
 	}
 
-	// Загружаем блюда и проверяем калории
+	// Load meals and calculate calories
 	var meals []models.Meal
 	var totalCalories int
 
@@ -170,7 +170,7 @@ func (h *Handler) SaveCollection(c *gin.Context) {
 			return
 		}
 
-		// Проверяем, что блюдо из правильного ресторана
+		// Check that the meal belongs to the correct restaurant
 		if meal.RestaurantID != req.RestaurantID {
 			ErrorResponseJSON(c, http.StatusBadRequest, "meal_mismatch", "Meal does not belong to the restaurant")
 			return
@@ -180,7 +180,7 @@ func (h *Handler) SaveCollection(c *gin.Context) {
 		totalCalories += meal.Calories
 	}
 
-	// Сохраняем коллекцию
+	// Save the collection
 	collection := &models.MealSet{
 		UserID:        user.ID,
 		RestaurantID:  req.RestaurantID,
@@ -204,7 +204,7 @@ func (h *Handler) SaveCollection(c *gin.Context) {
 
 // ===== Admin =====
 
-// AdminCreateRestaurant создаёт новый ресторан
+// AdminCreateRestaurant creates a new restaurant
 // POST /api/admin/restaurants
 // Body: {"name": "..."}
 func (h *Handler) AdminCreateRestaurant(c *gin.Context) {
@@ -223,7 +223,7 @@ func (h *Handler) AdminCreateRestaurant(c *gin.Context) {
 	SuccessResponse(c, http.StatusCreated, restaurant, "Restaurant created successfully")
 }
 
-// AdminCreateMeal добавляет блюдо в ресторан
+// AdminCreateMeal adds a meal to a restaurant
 // POST /api/admin/meals
 // Body: {"restaurant_id": "...", "name": "...", "calories": 350, "price": 450.0, "description": "..."}
 func (h *Handler) AdminCreateMeal(c *gin.Context) {
