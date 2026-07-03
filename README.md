@@ -19,6 +19,12 @@ go version        # нужен Go 1.21+
 docker --version  # нужен Docker Desktop (запущенный)
 ```
 
+### Создай .env
+
+```powershell
+cp .env.example .env
+```
+
 ### Собери бинарник
 
 ```powershell
@@ -67,12 +73,6 @@ Get-Process -Id (Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyConti
 
 ---
 
-## Важно: локальный PostgreSQL
-
-На машине установлен PostgreSQL, который занимает порт `5432`. Docker-контейнер поэтому использует порт `5433` — это уже прописано в `docker-compose.yml` и `.env`, ничего менять не нужно.
-
----
-
 ## Структура проекта
 
 ```
@@ -88,7 +88,7 @@ meal-planner/
 ├── frontend/                # HTML, CSS, JS
 ├── menu-photos/             # фото меню (не в git)
 ├── docker-compose.yml
-└── .env
+└── .env.example              # шаблон, скопируй в .env
 ```
 
 ## Данные в БД

@@ -11,6 +11,9 @@ menu-photos/**/*.webp
 # Environment secrets
 .env
 
+# Local Claude Code notes (solo project, not needed in public repo)
+CLAUDE.md
+
 # IDE
 .vscode/
 .idea/
