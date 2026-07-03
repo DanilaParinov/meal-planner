@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/meal-planner/internal/db"
-	"github.com/yourusername/meal-planner/internal/models"
+	"meal-planner/internal/db"
+	"meal-planner/internal/models"
 )
 
 // AuthMiddleware проверяет API ключ в заголовке

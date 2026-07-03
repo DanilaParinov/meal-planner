@@ -1,8 +1,0 @@
-2026/06/19 22:17:33 🚀 Starting Meal Planner API (env: development, port: 8080)
-2026/06/19 22:17:33 ✓ Connected to database
-2026/06/19 22:17:33 ✓ Executed migration: 001_create_tables.sql
-2026/06/19 22:17:33 ✓ Executed migration: 002_seed_test_data.sql
-2026/06/19 22:17:33 ✓ Executed migration: 003_import_restaurants.sql
-2026/06/19 22:17:33 ✓ Server listening on http://localhost:8080
-2026/06/19 22:17:33 ✓ UI available at http://localhost:8080/ui
-exit status 0xffffffff

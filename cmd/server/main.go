@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/meal-planner/internal/api"
-	"github.com/yourusername/meal-planner/internal/config"
-	"github.com/yourusername/meal-planner/internal/db"
+	"meal-planner/internal/api"
+	"meal-planner/internal/config"
+	"meal-planner/internal/db"
 )
 
 func main() {

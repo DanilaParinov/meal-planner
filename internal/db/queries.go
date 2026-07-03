@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/lib/pq"
-	"github.com/yourusername/meal-planner/internal/models"
+	"meal-planner/internal/models"
 )
 
 // Repository инкапсулирует все операции с БД

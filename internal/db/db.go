@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	_ "github.com/lib/pq"
-	"github.com/yourusername/meal-planner/internal/config"
+	"meal-planner/internal/config"
 )
 
 // Database инкапсулирует подключение к БД

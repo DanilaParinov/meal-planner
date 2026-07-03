@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yourusername/meal-planner/internal/algorithm"
-	"github.com/yourusername/meal-planner/internal/db"
-	"github.com/yourusername/meal-planner/internal/models"
+	"meal-planner/internal/algorithm"
+	"meal-planner/internal/db"
+	"meal-planner/internal/models"
 )
 
 // Handler инкапсулирует все обработчики HTTP запросов

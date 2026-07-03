@@ -8,6 +8,9 @@ menu-photos/**/*.webp
 *.exe
 *.out
 
+# Environment secrets
+.env
+
 # IDE
 .vscode/
 .idea/

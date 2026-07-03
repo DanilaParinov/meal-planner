@@ -5,11 +5,11 @@ services:
     image: postgres:15
     container_name: meal_planner_db
     environment:
-      POSTGRES_USER: changeme_user
-      POSTGRES_PASSWORD: changeme_password
-      POSTGRES_DB: meal_planner
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "5433:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

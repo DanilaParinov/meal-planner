@@ -3,7 +3,7 @@ package algorithm
 import (
 	"sort"
 
-	"github.com/yourusername/meal-planner/internal/models"
+	"meal-planner/internal/models"
 )
 
 const maxDishesPerCombo = 3

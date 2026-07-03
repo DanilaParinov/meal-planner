@@ -1,4 +1,4 @@
-module github.com/yourusername/meal-planner
+module meal-planner
 
 go 1.21
 
