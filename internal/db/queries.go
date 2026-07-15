@@ -140,9 +140,9 @@ func (r *Repository) CreateMeal(meal *models.Meal) (string, error) {
 func (r *Repository) GetUserByAPIKey(apiKey string) (*models.User, error) {
 	var user models.User
 	err := r.db.QueryRow(
-		"SELECT id, device_id, api_key, created_at FROM users WHERE api_key = $1",
+		"SELECT id, COALESCE(name, ''), device_id, api_key, is_admin, created_at FROM users WHERE api_key = $1",
 		apiKey,
-	).Scan(&user.ID, &user.DeviceID, &user.APIKey, &user.CreatedAt)
+	).Scan(&user.ID, &user.Name, &user.DeviceID, &user.APIKey, &user.IsAdmin, &user.CreatedAt)
 
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("user not found")
@@ -154,17 +154,38 @@ func (r *Repository) GetUserByAPIKey(apiKey string) (*models.User, error) {
 	return &user, nil
 }
 
-// CreateUser adds a new user
-func (r *Repository) CreateUser(user *models.User) (string, error) {
-	var id string
+// CreateUser adds a new user, filling in the generated ID and creation time
+func (r *Repository) CreateUser(user *models.User) (*models.User, error) {
 	err := r.db.QueryRow(
-		`INSERT INTO users (device_id, api_key) 
-		 VALUES ($1, $2) 
-		 RETURNING id`,
-		user.DeviceID, user.APIKey,
-	).Scan(&id)
+		`INSERT INTO users (name, device_id, api_key, is_admin)
+		 VALUES ($1, $2, $3, $4)
+		 RETURNING id, created_at`,
+		user.Name, user.DeviceID, user.APIKey, user.IsAdmin,
+	).Scan(&user.ID, &user.CreatedAt)
 
-	return id, err
+	return user, err
+}
+
+// GetAllUsers returns all users, without their API keys
+func (r *Repository) GetAllUsers() ([]models.User, error) {
+	rows, err := r.db.Query(
+		"SELECT id, COALESCE(name, ''), device_id, is_admin, created_at FROM users ORDER BY created_at",
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Name, &user.DeviceID, &user.IsAdmin, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, rows.Err()
 }
 
 // ===== Meal Collections =====

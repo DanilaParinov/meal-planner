@@ -52,7 +52,13 @@ docker-compose up -d
 
 **Приложение:** `http://localhost:8080`  
 **Админ-панель:** `http://localhost:8080/admin.html`  
-**Тестовые API ключи:** `test-user-abc123xyz`, `test-user-def456uvw`
+**Тестовые API ключи (для локальной разработки):** `test-user-abc123xyz`, `test-user-def456uvw`
+
+Для реального пользователя или администратора создайте отдельный аккаунт:
+```bash
+go run cmd/createuser/main.go -name "Имя" [-admin]
+```
+Ключ будет выведен один раз в терминал — сохраните его.
 
 ### Остановить
 

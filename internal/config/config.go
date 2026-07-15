@@ -21,9 +21,6 @@ type Config struct {
 	// Server
 	ServerPort string
 	ServerEnv  string
-
-	// Test users
-	TestUsers map[string]string // api_key -> device_id
 }
 
 // Load loads configuration from the .env file and environment variables
@@ -41,25 +38,39 @@ func Load() (*Config, error) {
 
 		ServerPort: getEnv("SERVER_PORT", "8080"),
 		ServerEnv:  getEnv("SERVER_ENV", "development"),
-
-		TestUsers: make(map[string]string),
 	}
 
-	// Load test users
-	// Example: TEST_USER_1_API_KEY=abc123, TEST_USER_1_DEVICE_ID=device-1
-	for i := 1; i <= 10; i++ {
-		apiKeyEnv := fmt.Sprintf("TEST_USER_%d_API_KEY", i)
-		deviceIDEnv := fmt.Sprintf("TEST_USER_%d_DEVICE_ID", i)
-
-		apiKey := os.Getenv(apiKeyEnv)
-		deviceID := os.Getenv(deviceIDEnv)
-
-		if apiKey != "" && deviceID != "" {
-			cfg.TestUsers[apiKey] = deviceID
-		}
+	if err := cfg.validate(); err != nil {
+		return nil, fmt.Errorf("invalid configuration: %w", err)
 	}
 
 	return cfg, nil
+}
+
+// validate checks that configuration values are sane and safe to run with
+func (c *Config) validate() error {
+	if _, err := strconv.Atoi(c.ServerPort); err != nil {
+		return fmt.Errorf("SERVER_PORT %q must be a number", c.ServerPort)
+	}
+	if _, err := strconv.Atoi(c.DBPort); err != nil {
+		return fmt.Errorf("DB_PORT %q must be a number", c.DBPort)
+	}
+
+	validSSLModes := map[string]bool{
+		"disable":     true,
+		"require":     true,
+		"verify-ca":   true,
+		"verify-full": true,
+	}
+	if !validSSLModes[c.DBSSLMode] {
+		return fmt.Errorf("DB_SSLMODE %q must be one of: disable, require, verify-ca, verify-full", c.DBSSLMode)
+	}
+
+	if !c.IsDevelopment() && (c.DBUser == "changeme_user" || c.DBPassword == "changeme_password") {
+		return fmt.Errorf("DB_USER/DB_PASSWORD must be set to non-default values outside development (SERVER_ENV=%s)", c.ServerEnv)
+	}
+
+	return nil
 }
 
 // GetDatabaseURL builds the database connection string

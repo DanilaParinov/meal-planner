@@ -6,6 +6,8 @@ import (
 	"meal-planner/internal/models"
 )
 
+// maxDishesPerCombo bounds the search depth. See the scaling note on
+// FindBestCombinations before changing this or the algorithm itself.
 const maxDishesPerCombo = 3
 
 func mealWeight(m models.Meal) int {
@@ -18,6 +20,18 @@ func mealWeight(m models.Meal) int {
 // FindBestCombinations returns the top N combinations, sorted by the sum of
 // limit-usage percentages: (totalCals/maxCals + totalWeight/maxWeight) * 100.
 // If maxWeight == 0, the weight limit is not applied.
+//
+// This is a bounded backtracking search (see backtrack below), not a
+// dynamic-programming knapsack: it enumerates actual subsets of meals up to
+// maxDishesPerCombo, pruned by calorie/weight limits and sorting. That's
+// fine at today's scale (one restaurant's menu, depth 3 — at most a few
+// thousand combinations). If either scale changes materially — meals are
+// pooled across multiple restaurants, or maxDishesPerCombo grows well past
+// 3 — revisit before just letting it run slower:
+//   - keep enumerating, but maintain a size-topN min-heap of solutions
+//     instead of collecting everything then sorting, to cut peak memory/work;
+//   - or switch to actual DP (subset-sum style) if only the single best
+//     combination near the limit is needed, not the top N distinct ones.
 func FindBestCombinations(meals []models.Meal, maxCals, maxWeight int, includeDrinks bool, topN int) []models.MealCombination {
 	valid := make([]models.Meal, 0, len(meals))
 	for _, m := range meals {

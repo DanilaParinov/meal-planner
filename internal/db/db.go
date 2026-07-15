@@ -3,8 +3,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -46,7 +46,7 @@ func New(cfg *config.Config) (*Database, error) {
 // runMigrations executes all SQL migrations from the migrations/ folder
 func (d *Database) runMigrations() error {
 	// Read migrations from the folder
-	files, err := ioutil.ReadDir("migrations")
+	files, err := os.ReadDir("migrations")
 	if err != nil {
 		return fmt.Errorf("failed to read migrations directory: %w", err)
 	}
@@ -54,7 +54,7 @@ func (d *Database) runMigrations() error {
 	for _, f := range files {
 		if !f.IsDir() && strings.HasSuffix(f.Name(), ".sql") {
 			filePath := filepath.Join("migrations", f.Name())
-			content, err := ioutil.ReadFile(filePath)
+			content, err := os.ReadFile(filePath)
 			if err != nil {
 				return fmt.Errorf("failed to read migration file %s: %w", filePath, err)
 			}

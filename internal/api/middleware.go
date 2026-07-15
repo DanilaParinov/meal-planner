@@ -43,6 +43,24 @@ func AuthMiddleware(repo *db.Repository) gin.HandlerFunc {
 	}
 }
 
+// RequireAdmin restricts access to admin users; must run after AuthMiddleware
+func RequireAdmin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		user := GetUserFromContext(c)
+		if user == nil || !user.IsAdmin {
+			c.JSON(403, models.ErrorResponse{
+				Error:   "forbidden",
+				Message: "Admin access required",
+				Code:    "ADMIN_REQUIRED",
+			})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
 // ErrorHandler handles validation errors
 func ErrorHandler(c *gin.Context, err error) {
 	c.JSON(400, models.ErrorResponse{

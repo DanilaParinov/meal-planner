@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"meal-planner/internal/algorithm"
+	"meal-planner/internal/auth"
 	"meal-planner/internal/db"
 	"meal-planner/internal/models"
 )
@@ -37,10 +38,19 @@ func (h *Handler) RegisterRoutes(router *gin.Engine) {
 		// History
 		authorized.GET("/api/collections", h.GetCollections)
 		authorized.POST("/api/collections", h.SaveCollection)
+	}
 
-		// Admin: manual entry of restaurants and meals
-		authorized.POST("/api/admin/restaurants", h.AdminCreateRestaurant)
-		authorized.POST("/api/admin/meals", h.AdminCreateMeal)
+	// Admin endpoints (require authentication + admin role)
+	admin := router.Group("/api/admin")
+	admin.Use(AuthMiddleware(h.repo), RequireAdmin())
+	{
+		// Manual entry of restaurants and meals
+		admin.POST("/restaurants", h.AdminCreateRestaurant)
+		admin.POST("/meals", h.AdminCreateMeal)
+
+		// User management
+		admin.GET("/users", h.AdminListUsers)
+		admin.POST("/users", h.AdminCreateUser)
 	}
 }
 
@@ -255,4 +265,55 @@ func (h *Handler) AdminCreateMeal(c *gin.Context) {
 
 	meal.ID = id
 	SuccessResponse(c, http.StatusCreated, meal, "Meal created successfully")
+}
+
+// AdminListUsers returns all users (without API keys)
+// GET /api/admin/users
+func (h *Handler) AdminListUsers(c *gin.Context) {
+	users, err := h.repo.GetAllUsers()
+	if err != nil {
+		ErrorResponseJSON(c, http.StatusInternalServerError, "database_error", "Failed to fetch users")
+		return
+	}
+
+	SuccessResponse(c, http.StatusOK, users, "")
+}
+
+// AdminCreateUser creates a new user with a freshly generated API key
+// POST /api/admin/users
+// Body: {"name": "...", "is_admin": false}
+func (h *Handler) AdminCreateUser(c *gin.Context) {
+	var req models.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		ErrorHandler(c, err)
+		return
+	}
+
+	apiKey, err := auth.GenerateAPIKey()
+	if err != nil {
+		ErrorResponseJSON(c, http.StatusInternalServerError, "key_generation_failed", "Failed to generate API key")
+		return
+	}
+
+	deviceID, err := auth.GenerateDeviceID()
+	if err != nil {
+		ErrorResponseJSON(c, http.StatusInternalServerError, "key_generation_failed", "Failed to generate device ID")
+		return
+	}
+
+	user := &models.User{
+		Name:     req.Name,
+		DeviceID: deviceID,
+		APIKey:   apiKey,
+		IsAdmin:  req.IsAdmin,
+	}
+
+	user, err = h.repo.CreateUser(user)
+	if err != nil {
+		ErrorResponseJSON(c, http.StatusInternalServerError, "database_error", "Failed to create user")
+		return
+	}
+
+	// The API key is only ever returned here, at creation time
+	SuccessResponse(c, http.StatusCreated, user, "User created successfully")
 }

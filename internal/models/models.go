@@ -22,11 +22,13 @@ type Meal struct {
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
 }
 
-// User represents a test user
+// User represents a user of the application
 type User struct {
 	ID        string    `json:"id" db:"id"`
+	Name      string    `json:"name,omitempty" db:"name"`
 	DeviceID  string    `json:"device_id" db:"device_id"`
-	APIKey    string    `json:"api_key" db:"api_key"`
+	APIKey    string    `json:"api_key,omitempty" db:"api_key"`
+	IsAdmin   bool      `json:"is_admin" db:"is_admin"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
@@ -77,6 +79,12 @@ type CreateMealRequest struct {
 	Calories     int     `json:"calories" binding:"required,min=1,max=10000"`
 	Price        float64 `json:"price" binding:"min=0"`
 	Description  string  `json:"description"`
+}
+
+// CreateUserRequest creates a new user (admin only)
+type CreateUserRequest struct {
+	Name    string `json:"name" binding:"required,min=1,max=255"`
+	IsAdmin bool   `json:"is_admin"`
 }
 
 // ErrorResponse is a generic error message
